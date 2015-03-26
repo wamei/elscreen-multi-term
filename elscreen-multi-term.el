@@ -46,17 +46,15 @@
 (defvar emt-term-buffer-name "*screen terminal<%d>*")
 
 (defun emt-multi-term (&optional number)
-  "NUMBERに対応するTERMを立ち上げる."
+  "NUMBERに対応するTERMを立ち上げる.なければ作成する."
   (interactive)
   (let* ((number (or number (elscreen-get-current-screen)))
          (buffer (get-buffer (format emt-term-buffer-name number))))
-    (cond (buffer
-           (switch-to-buffer buffer))
-          (t
-           (setq buffer (multi-term))
-           (with-current-buffer buffer
-             (rename-buffer (format emt-term-buffer-name number)))
-           (switch-to-buffer buffer)))))
+    (unless buffer
+      (setq buffer (multi-term))
+      (with-current-buffer buffer
+        (rename-buffer (format emt-term-buffer-name number))))
+    (switch-to-buffer buffer)))
 
 (defun emt-toggle-multi-term ()
   "直前のBUFFERとTERMを切り替える."
