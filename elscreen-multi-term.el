@@ -68,6 +68,12 @@
           (t
            (emt-multi-term screen-number)))))
 
+(defun emt-get-multi-term-buffer (&optional number)
+  "NUMBERに対応するTERMを取得する."
+  (let* ((number (or number (elscreen-get-current-screen)))
+         (buffer (get-buffer (format emt-term-buffer-name number))))
+    buffer))
+
 (defun emt-screen-kill:around (origin &rest args)
   "SCREENの削除時に対応するTERMを削除する."
   (let* ((screen (or (and (integerp (car args)) (car args))
