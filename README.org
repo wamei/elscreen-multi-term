@@ -18,3 +18,5 @@
    When the multi-term  buffer already exists, switch to the buffer.
 ** Function: =emt-toggle-multi-term=
    Toggle between current buffer and the multi-term buffer.
+** Function: =emt-pop-multi-term=
+   Pop to the multi-term buffer.

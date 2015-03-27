@@ -36,6 +36,9 @@
 ;;
 ;; Function: emt-toggle-multi-term
 ;;   Toggle between current buffer and the multi-term buffer.
+;;
+;; Function: emt-pop-multi-term
+;;   Pop to the multi-term buffer.
 
 ;;; Code:
 
@@ -57,6 +60,27 @@
          (switch-to-prev-buffer))
         (t
          (emt-multi-term))))
+
+(defun emt-pop-multi-term ()
+  "TERMをPOPさせる."
+  (interactive)
+  (let* ((buffer (emt-get-or-create-multi-term-buffer))
+         (is-current-buffer (eq (current-buffer) buffer))
+         (is-shown nil)
+         (window))
+    (cond ((and (not (one-window-p)) is-current-buffer)
+           (delete-window))
+          ((not is-current-buffer)
+           (walk-windows
+            (lambda (win)
+              (when (eq (window-buffer win) buffer)
+                (setq window win)
+                (setq is-shown t))))
+           (cond (is-shown
+                  (select-window window)
+                  (switch-to-buffer buffer))
+                 (t
+                  (pop-to-buffer buffer)))))))
 
 (defun emt-get-or-create-multi-term-buffer (&optional number)
   "NUMBERに対応するTERM-BUFFERを取得する.なければ作成する."
