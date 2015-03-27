@@ -108,12 +108,13 @@
   "SCREENの削除時に対応するTERMを削除する."
   (let* ((screen (or (and (integerp (car args)) (car args))
                      (elscreen-get-current-screen)))
-         (origin-return (apply origin args))
-         (buffer (get-buffer (format emt-term-buffer-name screen))))
+         (buffer (get-buffer (format emt-term-buffer-name screen)))
+         (origin-return (apply origin args)))
     (when origin-return
-      (cond (buffer
-             (delete-process buffer)
-             (kill-buffer buffer))))
+      (letf (((symbol-function 'switch-to-buffer) (symbol-function 'emt-nothing-to-buffer)))
+        (cond (buffer
+               (delete-process buffer)
+               (kill-buffer buffer)))))
     origin-return))
 
 (defun emt-screen-swap:around (origin &rest args)
