@@ -46,33 +46,39 @@
 (defvar emt-term-buffer-name "*screen terminal<%d>*")
 
 (defun emt-multi-term (&optional number)
-  "NUMBERに対応するTERMを立ち上げる.なければ作成する."
+  "NUMBERに対応するTERMに切り替える.なければ作成する."
   (interactive)
-  (let* ((number (or number (elscreen-get-current-screen)))
-         (buffer (get-buffer (format emt-term-buffer-name number))))
-    (unless buffer
-      (setq buffer (multi-term))
-      (with-current-buffer buffer
-        (rename-buffer (format emt-term-buffer-name number))))
-    (switch-to-buffer buffer)))
+  (switch-to-buffer (emt-get-or-create-multi-term-buffer number)))
 
 (defun emt-toggle-multi-term ()
   "直前のBUFFERとTERMを切り替える."
   (interactive)
-  (let* ((screen-number (elscreen-get-current-screen))
-         (buffer (get-buffer (format emt-term-buffer-name screen-number))))
-    (cond ((equal buffer (current-buffer))
-           (switch-to-prev-buffer))
-          (buffer
-           (switch-to-buffer buffer))
-          (t
-           (emt-multi-term screen-number)))))
+  (cond ((equal (emt-get-multi-term-buffer) (current-buffer))
+         (switch-to-prev-buffer))
+        (t
+         (emt-multi-term))))
+
+(defun emt-get-or-create-multi-term-buffer (&optional number)
+  "NUMBERに対応するTERM-BUFFERを取得する.なければ作成する."
+  (let* ((number (or number (elscreen-get-current-screen)))
+         (buffer (get-buffer (format emt-term-buffer-name number))))
+    (unless buffer
+      (save-current-buffer
+        (letf (((symbol-function 'switch-to-buffer) (symbol-function 'emt-nothing-to-buffer)))
+          (setq buffer (multi-term))))
+      (with-current-buffer buffer
+        (rename-buffer (format emt-term-buffer-name number))))
+    buffer))
 
 (defun emt-get-multi-term-buffer (&optional number)
-  "NUMBERに対応するTERMを取得する."
+  "NUMBERに対応するTERM-BUFFERを取得する."
   (let* ((number (or number (elscreen-get-current-screen)))
          (buffer (get-buffer (format emt-term-buffer-name number))))
     buffer))
+
+(defun emt-nothing-to-buffer (buffer-or-name &optional norecord force-same-window)
+  (interactive)
+  buffer-or-name)
 
 (defun emt-screen-kill:around (origin &rest args)
   "SCREENの削除時に対応するTERMを削除する."
