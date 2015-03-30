@@ -53,18 +53,19 @@
   (interactive)
   (switch-to-buffer (emt-get-or-create-multi-term-buffer number)))
 
-(defun emt-toggle-multi-term ()
-  "直前のBUFFERとTERMを切り替える."
+(defun emt-toggle-multi-term (&optional number)
+  "NUMBERに対応するTERMと現在のBUFFERを切り替える."
   (interactive)
-  (cond ((equal (emt-get-multi-term-buffer) (current-buffer))
-         (switch-to-prev-buffer))
-        (t
-         (emt-multi-term))))
+  (let ((buffer (emt-get-or-create-multi-term-buffer number)))
+    (cond ((equal buffer (current-buffer))
+           (switch-to-prev-buffer))
+          (t
+           (switch-to-buffer buffer)))))
 
-(defun emt-pop-multi-term ()
-  "TERMをPOPさせる."
+(defun emt-pop-multi-term (&optional number)
+  "NUMBERに対応するTERMをPOPさせる."
   (interactive)
-  (let* ((buffer (emt-get-or-create-multi-term-buffer))
+  (let* ((buffer (emt-get-or-create-multi-term-buffer number))
          (is-current-buffer (eq (current-buffer) buffer))
          (is-shown nil)
          (window))
