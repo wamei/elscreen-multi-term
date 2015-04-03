@@ -47,6 +47,7 @@
 (require 'multi-term)
 
 (defvar emt-term-buffer-name "*screen terminal<%d>*")
+(defvar emt-pop-to-buffer-function 'pop-to-buffer)
 
 (defun emt-multi-term (&optional number)
   "NUMBERに対応するTERMに切り替える.なければ作成する."
@@ -81,7 +82,7 @@
                   (select-window window)
                   (switch-to-buffer buffer))
                  (t
-                  (pop-to-buffer buffer)))))))
+                  (funcall emt-pop-to-buffer-function buffer)))))))
 
 (defun emt-get-or-create-multi-term-buffer (&optional number)
   "NUMBERに対応するTERM-BUFFERを取得する.なければ作成する."
