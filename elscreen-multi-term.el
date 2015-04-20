@@ -2,7 +2,7 @@
 
 ;; Author: wamei <wamei.cho@gmail.com>
 ;; Keywords: elscreen, multi term
-;; Version: 0.1.0
+;; Version: 0.1.1
 ;; Package-Requires: ((emacs "24.4") (elscreen "1.4.6") (multi-term "1.3"))
 
 ;; License:
@@ -66,12 +66,14 @@
 (defun emt-pop-multi-term (&optional number)
   "NUMBERに対応するTERMをPOPさせる."
   (interactive)
-  (let* ((buffer (emt-get-or-create-multi-term-buffer number))
+  (let* ((number (or number (elscreen-get-current-screen)))
+         (buffer (emt-get-or-create-multi-term-buffer number))
          (is-current-buffer (eq (current-buffer) buffer))
          (is-shown nil)
          (window))
     (cond ((and (not (one-window-p)) is-current-buffer)
-           (delete-window))
+           (delete-window)
+           (jump-to-register (intern (format emt-term-buffer-name number))))
           ((not is-current-buffer)
            (walk-windows
             (lambda (win)
@@ -82,6 +84,7 @@
                   (select-window window)
                   (switch-to-buffer buffer))
                  (t
+                  (window-configuration-to-register (intern (format emt-term-buffer-name number)))
                   (funcall emt-pop-to-buffer-function buffer)))))))
 
 (defun emt-get-or-create-multi-term-buffer (&optional number)
