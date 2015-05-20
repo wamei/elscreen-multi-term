@@ -46,7 +46,7 @@
 (require 'elscreen)
 (require 'multi-term)
 
-(defvar emt-term-buffer-name "*screen terminal<%d>*")
+(defvar emt-term-buffer-name "*screen terminal%s-<%d>*")
 (defvar emt-pop-to-buffer-function 'pop-to-buffer)
 
 (defun emt-multi-term (&optional number)
@@ -72,8 +72,7 @@
          (is-shown nil)
          (window))
     (cond ((and (not (one-window-p)) is-current-buffer)
-           (delete-window)
-           (jump-to-register (intern (format emt-term-buffer-name number))))
+           (delete-window))
           ((not is-current-buffer)
            (walk-windows
             (lambda (win)
@@ -84,25 +83,26 @@
                   (select-window window)
                   (switch-to-buffer buffer))
                  (t
-                  (window-configuration-to-register (intern (format emt-term-buffer-name number)))
                   (funcall emt-pop-to-buffer-function buffer)))))))
 
 (defun emt-get-or-create-multi-term-buffer (&optional number)
   "NUMBERに対応するTERM-BUFFERを取得する.なければ作成する."
   (let* ((number (or number (elscreen-get-current-screen)))
-         (buffer (get-buffer (format emt-term-buffer-name number))))
+         (fname (format "%s" (selected-frame)))
+         (buffer (get-buffer (format emt-term-buffer-name fname number))))
     (unless buffer
       (save-current-buffer
         (letf (((symbol-function 'switch-to-buffer) (symbol-function 'emt-nothing-to-buffer)))
           (setq buffer (multi-term))))
       (with-current-buffer buffer
-        (rename-buffer (format emt-term-buffer-name number))))
+        (rename-buffer (format emt-term-buffer-name fname number))))
     buffer))
 
 (defun emt-get-multi-term-buffer (&optional number)
   "NUMBERに対応するTERM-BUFFERを取得する."
   (let* ((number (or number (elscreen-get-current-screen)))
-         (buffer (get-buffer (format emt-term-buffer-name number))))
+         (fname (format "%s" (selected-frame)))
+         (buffer (get-buffer (format emt-term-buffer-name fname number))))
     buffer))
 
 (defun emt-nothing-to-buffer (buffer-or-name &optional norecord force-same-window)
@@ -113,7 +113,8 @@
   "SCREENの削除時に対応するTERMを削除する."
   (let* ((screen (or (and (integerp (car args)) (car args))
                      (elscreen-get-current-screen)))
-         (buffer (get-buffer (format emt-term-buffer-name screen)))
+         (fname (format "%s" (selected-frame)))
+         (buffer (get-buffer (format emt-term-buffer-name fname screen)))
          (origin-return (apply origin args)))
     (when origin-return
       (letf (((symbol-function 'switch-to-buffer) (symbol-function 'emt-nothing-to-buffer)))
@@ -128,18 +129,19 @@
     (when origin-return
       (let* ((current-screen (elscreen-get-current-screen))
              (previous-screen (elscreen-get-previous-screen))
-             (current-buffer (get-buffer (format emt-term-buffer-name current-screen)))
-             (previous-buffer (get-buffer (format emt-term-buffer-name previous-screen))))
+             (fname (format "%s" (selected-frame)))
+             (current-buffer (get-buffer (format emt-term-buffer-name fname current-screen)))
+             (previous-buffer (get-buffer (format emt-term-buffer-name fname previous-screen))))
         (if current-buffer
           (with-current-buffer current-buffer
-            (rename-buffer (format (concat emt-term-buffer-name "-tmp") previous-screen))
+            (rename-buffer (format (concat emt-term-buffer-name "-tmp") fname previous-screen))
             (when previous-buffer
               (with-current-buffer previous-buffer
-                (rename-buffer (format emt-term-buffer-name current-screen))))
-            (rename-buffer (format emt-term-buffer-name previous-screen)))
+                (rename-buffer (format emt-term-buffer-name fname current-screen))))
+            (rename-buffer (format emt-term-buffer-name fname previous-screen)))
           (when previous-buffer
             (with-current-buffer previous-buffer
-              (rename-buffer (format emt-term-buffer-name current-screen)))))))
+              (rename-buffer (format emt-term-buffer-name fname current-screen)))))))
     origin-return))
 
 (advice-add 'elscreen-kill :around 'emt-screen-kill:around)
