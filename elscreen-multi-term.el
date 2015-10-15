@@ -46,7 +46,7 @@
 (require 'elscreen)
 (require 'multi-term)
 
-(defvar emt-term-buffer-name "*screen terminal%s-<%d>*")
+(defvar emt-term-buffer-name "*screen terminal<%s-%d>*")
 (defvar emt-pop-to-buffer-function 'pop-to-buffer)
 
 (defun emt-multi-term (&optional number)
@@ -88,7 +88,7 @@
 (defun emt-get-or-create-multi-term-buffer (&optional number)
   "NUMBERに対応するTERM-BUFFERを取得する.なければ作成する."
   (let* ((number (or number (elscreen-get-current-screen)))
-         (fname (format "%s" (selected-frame)))
+         (fname (frame-parameter (selected-frame) 'window-id))
          (buffer (get-buffer (format emt-term-buffer-name fname number))))
     (unless buffer
       (save-current-buffer
@@ -101,7 +101,7 @@
 (defun emt-get-multi-term-buffer (&optional number)
   "NUMBERに対応するTERM-BUFFERを取得する."
   (let* ((number (or number (elscreen-get-current-screen)))
-         (fname (format "%s" (selected-frame)))
+         (fname (frame-parameter (selected-frame) 'window-id))
          (buffer (get-buffer (format emt-term-buffer-name fname number))))
     buffer))
 
@@ -113,7 +113,7 @@
   "SCREENの削除時に対応するTERMを削除する."
   (let* ((screen (or (and (integerp (car args)) (car args))
                      (elscreen-get-current-screen)))
-         (fname (format "%s" (selected-frame)))
+         (fname (frame-parameter (selected-frame) 'window-id))
          (buffer (get-buffer (format emt-term-buffer-name fname screen)))
          (origin-return (apply origin args)))
     (when origin-return
@@ -129,7 +129,7 @@
     (when origin-return
       (let* ((current-screen (elscreen-get-current-screen))
              (previous-screen (elscreen-get-previous-screen))
-             (fname (format "%s" (selected-frame)))
+             (fname (frame-parameter (selected-frame) 'window-id))
              (current-buffer (get-buffer (format emt-term-buffer-name fname current-screen)))
              (previous-buffer (get-buffer (format emt-term-buffer-name fname previous-screen))))
         (if current-buffer
