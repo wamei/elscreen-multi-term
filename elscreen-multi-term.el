@@ -2,7 +2,7 @@
 
 ;; Author: wamei <wamei.cho@gmail.com>
 ;; Keywords: elscreen, multi term
-;; Version: 0.1.1
+;; Version: 0.1.2
 ;; Package-Requires: ((emacs "24.4") (elscreen "1.4.6") (multi-term "1.3"))
 
 ;; License:
