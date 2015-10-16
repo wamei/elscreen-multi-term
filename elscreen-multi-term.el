@@ -2,7 +2,7 @@
 
 ;; Author: wamei <wamei.cho@gmail.com>
 ;; Keywords: elscreen, multi term
-;; Version: 0.1.2
+;; Version: 0.1.3
 ;; Package-Requires: ((emacs "24.4") (elscreen "1.4.6") (multi-term "1.3"))
 
 ;; License:
@@ -88,7 +88,7 @@
 (defun emt-get-or-create-multi-term-buffer (&optional number)
   "NUMBERに対応するTERM-BUFFERを取得する.なければ作成する."
   (let* ((number (or number (elscreen-get-current-screen)))
-         (fname (frame-parameter (selected-frame) 'window-id))
+         (fname (emt-get-frame-name (selected-frame)))
          (buffer (get-buffer (format emt-term-buffer-name fname number))))
     (unless buffer
       (save-current-buffer
@@ -101,7 +101,7 @@
 (defun emt-get-multi-term-buffer (&optional number)
   "NUMBERに対応するTERM-BUFFERを取得する."
   (let* ((number (or number (elscreen-get-current-screen)))
-         (fname (frame-parameter (selected-frame) 'window-id))
+         (fname (emt-get-frame-name (selected-frame)))
          (buffer (get-buffer (format emt-term-buffer-name fname number))))
     buffer))
 
@@ -113,7 +113,7 @@
   "SCREENの削除時に対応するTERMを削除する."
   (let* ((screen (or (and (integerp (car args)) (car args))
                      (elscreen-get-current-screen)))
-         (fname (frame-parameter (selected-frame) 'window-id))
+         (fname (emt-get-frame-name (selected-frame)))
          (buffer (get-buffer (format emt-term-buffer-name fname screen)))
          (origin-return (apply origin args)))
     (when origin-return
@@ -129,7 +129,7 @@
     (when origin-return
       (let* ((current-screen (elscreen-get-current-screen))
              (previous-screen (elscreen-get-previous-screen))
-             (fname (frame-parameter (selected-frame) 'window-id))
+             (fname (emt-get-frame-name (selected-frame)))
              (current-buffer (get-buffer (format emt-term-buffer-name fname current-screen)))
              (previous-buffer (get-buffer (format emt-term-buffer-name fname previous-screen))))
         (if current-buffer
@@ -143,6 +143,12 @@
             (with-current-buffer previous-buffer
               (rename-buffer (format emt-term-buffer-name fname current-screen)))))))
     origin-return))
+
+(defun emt-get-frame-name (frame)
+  "FRAMEのユニークな文字列表現を返す."
+  (if window-system
+      (frame-parameter frame 'window-id)
+    (frame-parameter frame 'name)))
 
 (advice-add 'elscreen-kill :around 'emt-screen-kill:around)
 (advice-add 'elscreen-swap :around 'emt-screen-swap:around)
