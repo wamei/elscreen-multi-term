@@ -99,7 +99,8 @@
     (unless buffer
       (save-current-buffer
         (letf (((symbol-function 'switch-to-buffer) (symbol-function 'emt-nothing-to-buffer)))
-          (setq buffer (multi-term))))
+          (multi-term)
+          (setq buffer (current-buffer))))
       (with-current-buffer buffer
         (rename-buffer (format emt-term-buffer-name fname number))))
     buffer))
